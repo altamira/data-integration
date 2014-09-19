@@ -12,6 +12,7 @@ To install this service at Microsoft IIS server follow this steps:
    ![Alt text](img/iis-integration-site.png?raw=true "Create new site") 
 3. Add a new `HTTP Response Header` to enable [CORS](http://pt.wikipedia.org/wiki/Cross-origin_resource_sharing). 
    ![Alt text](img/iis-http-cosr-header.png?raw=true "Create new site")
+   `Access-Control-Allow-Origin = *`
 
 ### Setup Microsoft SQL Server 2008
 
