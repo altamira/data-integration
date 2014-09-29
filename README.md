@@ -26,11 +26,12 @@ To setup this database at SQL Server 2008 do the foloow:
    ![Alt text](img/create-user.png?raw=true "Create new site")
 
 2. Run the script `database.sql` at folder `/sql` to create database `INTEGRACAO`
-3. Grant `db_datareader` permission on login `integracao` to databases `INTEGRACAO`, `WBCCAD` and `GPIMAC_Altamira`.
+3. Run the scripts `manufacturing_bom.sql` and `manufacturing_process.sql`.
+4. Grant `db_datareader` permission on login `integracao` to databases `INTEGRACAO`, `WBCCAD` and `GPIMAC_Altamira`.
 
    ![Alt text](img/user-mapping.png?raw=true "Create new site")
 
-4. Adjust the database connection string user and password at `C:\inetput\wwwroot\manufacturing\bom\index.aspx`, at line 28 to point to the correct database, user and password, for example `Database=INTEGRACAO;User Id=integracao;Password=123456;`.
+5. Adjust the database connection string user and password at `C:\inetput\wwwroot\manufacturing\bom\index.aspx`, at line 28 to point to the correct database, user and password, for example `Database=INTEGRACAO;User Id=integracao;Password=123456;`.
 
 To run this service make a http request to
 
