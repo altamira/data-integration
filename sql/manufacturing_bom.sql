@@ -1,12 +1,16 @@
-/****** Object:  StoredProcedure [dbo].[MANUFACTURING_BOM]    Script Date: 09/19/2014 14:03:58 ******/
+USE [INTEGRACAO]
+GO
 
+/****** Object:  StoredProcedure [dbo].[MANUFACTURING_BOM]    Script Date: 09/29/2014 14:17:15 ******/
 SET ANSI_NULLS ON
-
 GO
 
 SET QUOTED_IDENTIFIER ON
-
 GO
+
+
+
+
 
 CREATE PROCEDURE [dbo].[MANUFACTURING_BOM] (@order INT) AS
 
@@ -76,4 +80,7 @@ SELECT STUFF(
 
 GO
 
+
+
 GRANT EXECUTE ON MANUFACTURING_BOM TO integracao
+GO
