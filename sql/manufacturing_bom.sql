@@ -1,7 +1,7 @@
 USE [INTEGRACAO]
 GO
 
-/****** Object:  StoredProcedure [dbo].[MANUFACTURING_BOM]    Script Date: 09/29/2014 14:17:15 ******/
+/****** Object:  StoredProcedure [dbo].[MANUFACTURING_BOM]    Script Date: 10/16/2014 21:38:42 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -12,7 +12,8 @@ GO
 
 
 
-CREATE PROCEDURE [dbo].[MANUFACTURING_BOM] (@order INT) AS
+
+ALTER PROCEDURE [dbo].[MANUFACTURING_BOM] (@order INT) AS
 
 
 SELECT STUFF(
@@ -23,13 +24,13 @@ SELECT STUFF(
 		+ ',"created":"' + LTRIM(RTRIM(ISNULL(CONVERT(NVARCHAR, GPIMAC_Altamira.dbo.LPV.LPENT, 127), ''))) /*'1410895028676'*/ + '"'
 		+ ',"delivery":"' + LTRIM(RTRIM(ISNULL(CONVERT(NVARCHAR, GPIMAC_Altamira.dbo.LPV.LP0SAIRED, 127), ''))) /*'1410895028676'*/ + '"'
 		+ ',"quotation":"' + GPIMAC_Altamira.dbo.LPV.LPWBCCADORCNUM + '"'
-		+ ',"comment":"' + CASE WHEN LEN(LTRIM(RTRIM(GPIMAC_Altamira.dbo.LPV.LPObsOP))) = 0 THEN '' ELSE LTRIM(RTRIM(GPIMAC_Altamira.dbo.LPV.LPObsOP)) END + '"',
-		+ ',"finish":"PINTURA A PÓ"' 
+		+ ',"comment":"' + CASE WHEN LEN(LTRIM(RTRIM(GPIMAC_Altamira.dbo.LPV.LPObsOP))) = 0 THEN '' ELSE LTRIM(RTRIM(REPLACE(REPLACE(GPIMAC_Altamira.dbo.LPV.LPObsOP, CHAR(10), ''), CHAR(13), ''))) END + '"',
+		+ ',"finish":""' 
 		+ ',"project":' + CAST(GPIMAC_Altamira.dbo.LPV.LPPED AS VARCHAR(MAX)) 
 		+ ',"items":' + '[' + STUFF(
 		(SELECT
 			',{"item":' + CAST(ISNULL(WBCCAD.dbo.INTEGRACAO_ORCITM.ORCITM, 0) AS VARCHAR(MAX)) 
-			+ ',"description":"' + LTRIM(RTRIM(LEFT(ISNULL(WBCCAD.dbo.INTEGRACAO_ORCITM.ORCTXT, ''), CHARINDEX(' Valor total líquido:', ISNULL(WBCCAD.dbo.INTEGRACAO_ORCITM.ORCTXT, ''))))) + '"'
+			+ ',"description":"' + LTRIM(RTRIM(REPLACE(REPLACE(LEFT(ISNULL(WBCCAD.dbo.INTEGRACAO_ORCITM.ORCTXT, ''), CHARINDEX(' Valor total líquido:', ISNULL(WBCCAD.dbo.INTEGRACAO_ORCITM.ORCTXT, ''))), CHAR(10), ''), CHAR(13), ''))) + '"'
 			--ISNULL(WBCCAD.dbo.INTEGRACAO_ORCITM.ORCPRDQTD, 0) AS quantity, 
 			--LTRIM(RTRIM(ISNULL(WBCCAD.dbo.INTEGRACAO_ORCITM.ORCPRDCOD, ''))) AS code, 
 			--ISNULL(WBCCAD.dbo.INTEGRACAO_ORCITM.GRPCOD, 0) AS [group], 
@@ -78,9 +79,7 @@ SELECT STUFF(
 
 
 
+
 GO
 
 
-
-GRANT EXECUTE ON MANUFACTURING_BOM TO integracao
-GO
