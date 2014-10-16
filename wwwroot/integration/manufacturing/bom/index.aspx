@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" %>
+<%@ Page Language="C#" %>
 
 <%// import das bibliotecas necessarias para acesso ao banco de dados, configuracao, etc...
 //Para manipular e prove acesso para classes ADO.NET%>
@@ -14,6 +14,18 @@
 <%@ Import Namespace="System.Web.Security"%>
 
 <%
+
+if (HttpContext.Current.Request.HttpMethod == "OPTIONS")
+{
+	Response.AddHeader("Access-Control-Allow-Origin", "http://localhost:8100");
+	Response.AddHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Origin, Origin, Content-Type, Content-Length, Accept, Authorization, X-Requested-With");
+	Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+	Response.AddHeader("Access-Control-Allow-Credentials", "true");
+	Response.AddHeader("Access-Control-Max-Age", "1209600");
+Response.Write("{\"message\": \"ok\"}");
+	Response.StatusCode = 200;
+	return;
+}
 
 // verifica se a requisicao veio via GET (requisicao de pagina)
 if (HttpContext.Current.Request.HttpMethod == "GET")
@@ -42,7 +54,7 @@ if (HttpContext.Current.Request.HttpMethod == "GET")
             // executa o comando para localizar o usuario no banco de dados
             String json = Convert.ToString(cmd.ExecuteScalar());
             
-            Response.ContentType = "application/json";
+            // Response.ContentType = "application/json charset=iso-8859-1"; // set in web.config
 
             if (json == null || json == "")
             {
