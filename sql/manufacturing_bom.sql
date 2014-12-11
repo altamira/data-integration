@@ -1,7 +1,7 @@
 USE [INTEGRACAO]
 GO
 
-/****** Object:  StoredProcedure [dbo].[MANUFACTURING_BOM]    Script Date: 12/10/2014 13:27:20 ******/
+/****** Object:  StoredProcedure [dbo].[MANUFACTURING_BOM]    Script Date: 12/11/2014 08:25:29 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,7 +9,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-ALTER PROCEDURE [dbo].[MANUFACTURING_BOM] (@order INT) AS
+
+CREATE PROCEDURE [dbo].[MANUFACTURING_BOM] (@order INT) AS
 
 SELECT STUFF(
 	(SELECT     
@@ -42,72 +43,71 @@ SELECT STUFF(
 				  + ',"description":"' + LTRIM(RTRIM(UPPER(ISNULL(MIN([PRDDSC]), '')))) + '"'
 				  + ',"color": ' + 
 				  (SELECT TOP 1
-						',{'
-						+ '"id": ' + CAST([ID] AS NVARCHAR) 
-						+ ',"code": "' + LTRIM(RTRIM([CODE])) 
-						+ '","name": "' + LTRIM(RTRIM([NAME])) + '"'
-						 + '}'
+						'{"id":' + CAST([ID] AS NVARCHAR) 
+						+ ',"code":"' + LTRIM(RTRIM([CODE])) + '"' 
+						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
+						+ '}'
 					FROM 
 						[INTEGRACAO].dbo.[CM_COLOR]
 					WHERE 
 						[CODE] = MIN([CORCOD])
 					FOR XML PATH(''), TYPE).value('.', 'varchar(max)')
-				  + ',"quantity": { "value": ' + CAST(CAST(ISNULL(SUM([ORCQTD]), 0) AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit": {
-    "id": 6,
-    "version": 1416181218645,
-    "name": "unidade",
-    "symbol": "un",
-    "magnitude": {
-        "id": 3,
-        "version": 1416181206233,
-        "name": "unidade"
-    }
-}}'
-				  + ',"width": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([PRDCOD], '#', '.'), 1) ELSE 0 END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit": {
-    "id": 4,
-    "version": 1416181212470,
-    "name": "milimetro",
-    "symbol": "mm",
-    "magnitude": {
-        "id": 1,
-        "version": 1416181199337,
-        "name": "dimencional"
-    }
-}}'
-				  + ',"height": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([PRDCOD], '#', '.'), 2) ELSE 0 END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit": {
-    "id": 4,
-    "version": 1416181212470,
-    "name": "milimetro",
-    "symbol": "mm",
-    "magnitude": {
-        "id": 1,
-        "version": 1416181199337,
-        "name": "dimencional"
-    }
-}}'
-				  + ',"length": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([PRDCOD], '#', '.'), 3) ELSE 0 END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit": {
-    "id": 4,
-    "version": 1416181212470,
-    "name": "milimetro",
-    "symbol": "mm",
-    "magnitude": {
-        "id": 1,
-        "version": 1416181199337,
-        "name": "dimencional"
-    }
-}}'
+				  + ',"quantity":{"value": ' + CAST(CAST(ISNULL(SUM([ORCQTD]), 0) AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ',"unit":' + 
+				  (SELECT TOP 1
+						'{"id":' + CAST([ID] AS NVARCHAR) 
+						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
+						+ ',"symbol":"' + LTRIM(RTRIM([SYMBOL])) + '"'
+						+ '}'
+					FROM 
+						[INTEGRACAO].dbo.[MS_UNIT]
+					WHERE 
+						[SYMBOL] = 'un'
+					FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
+				  + ',"width": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([PRDCOD], '#', '.'), 1) ELSE 0 END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit":' +
+				  (SELECT TOP 1
+						'{"id":' + CAST([ID] AS NVARCHAR) 
+						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
+						+ ',"symbol":"' + LTRIM(RTRIM([SYMBOL])) + '"'
+						+ '}'
+					FROM 
+						[INTEGRACAO].dbo.[MS_UNIT]
+					WHERE 
+						[SYMBOL] = 'mm'
+					FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
+				  + ',"height": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([PRDCOD], '#', '.'), 2) ELSE 0 END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit":' +
+				  (SELECT TOP 1
+						'{"id":' + CAST([ID] AS NVARCHAR) 
+						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
+						+ ',"symbol":"' + LTRIM(RTRIM([SYMBOL])) + '"'
+						+ '}'
+					FROM 
+						[INTEGRACAO].dbo.[MS_UNIT]
+					WHERE 
+						[SYMBOL] = 'mm'
+					FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
+				  + ',"length": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([PRDCOD], '#', '.'), 3) ELSE 0 END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit":' +
+				  (SELECT TOP 1
+						'{"id":' + CAST([ID] AS NVARCHAR) 
+						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
+						+ ',"symbol":"' + LTRIM(RTRIM([SYMBOL])) + '"'
+						+ '}'
+					FROM 
+						[INTEGRACAO].dbo.[MS_UNIT]
+					WHERE 
+						[SYMBOL] = 'mm'
+					FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
 				  --,CAST(ISNULL([ORCTOT], 0) AS DECIMAL(10,3)) AS value,
-				  + ',"weight": { "value": ' + CAST(SUM(CAST(ISNULL([ORCPES], 0) AS DECIMAL(10,3))) AS NVARCHAR(MAX)) + ', "unit": {
-    "id": 5,
-    "version": 1416181214807,
-    "name": "quilograma",
-    "symbol": "kg",
-    "magnitude": {
-        "id": 2,
-        "version": 1416181203701,
-        "name": "peso"
-    }
-}}'
+				  + ',"weight": { "value": ' + CAST(SUM(CAST(ISNULL([ORCPES], 0) AS DECIMAL(10,3))) AS NVARCHAR(MAX)) + ', "unit":' +
+				  (SELECT TOP 1
+						'{"id":' + CAST([ID] AS NVARCHAR) 
+						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
+						+ ',"symbol":"' + LTRIM(RTRIM([SYMBOL])) + '"'
+						+ '}'
+					FROM 
+						[INTEGRACAO].dbo.[MS_UNIT]
+					WHERE 
+						[SYMBOL] = 'kg'
+					FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
 				  +'}'
 			  FROM 
 				[WBCCAD].[dbo].[INTEGRACAO_ORCPRD]
@@ -136,6 +136,7 @@ SELECT STUFF(
 	WHERE     
 		(GPIMAC_Altamira.dbo.LPV.LPPED = @order)
 	FOR XML PATH(''), TYPE).value('.', 'varchar(max)'), 1, 1, '') AS 'order'
+
 
 
 
