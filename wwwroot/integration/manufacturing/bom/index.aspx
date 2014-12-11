@@ -17,10 +17,11 @@
 
 if (HttpContext.Current.Request.HttpMethod == "OPTIONS")
 {
-	Response.AddHeader("Access-Control-Allow-Origin", "http://localhost:8100");
+	//Response.AddHeader("Access-Control-Allow-Origin", "http://localhost:8100");
+	Response.AddHeader("Access-Control-Allow-Origin", "*");
 	Response.AddHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Origin, Origin, Content-Type, Content-Length, Accept, Authorization, X-Requested-With");
 	Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
-	Response.AddHeader("Access-Control-Allow-Credentials", "true");
+	//Response.AddHeader("Access-Control-Allow-Credentials", "true");
 	Response.AddHeader("Access-Control-Max-Age", "1209600");
 Response.Write("{\"message\": \"ok\"}");
 	Response.StatusCode = 200;
@@ -54,7 +55,7 @@ if (HttpContext.Current.Request.HttpMethod == "GET")
             // executa o comando para localizar o usuario no banco de dados
             String json = Convert.ToString(cmd.ExecuteScalar());
             
-            // Response.ContentType = "application/json charset=iso-8859-1"; // set in web.config
+            //Response.ContentType = "application/json; charset=iso-8859-1";
 
             if (json == null || json == "")
             {
