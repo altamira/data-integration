@@ -1,7 +1,7 @@
 USE [INTEGRACAO]
 GO
 
-/****** Object:  StoredProcedure [dbo].[MATERIAL]    Script Date: 12/12/2014 09:00:16 ******/
+/****** Object:  StoredProcedure [dbo].[MATERIAL]    Script Date: 12/12/2014 09:49:29 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -12,7 +12,8 @@ GO
 
 
 
-CREATE PROCEDURE [dbo].[MATERIAL] (@search NVARCHAR(MAX)) AS
+
+CREATE PROCEDURE [dbo].[MATERIAL] (@search NVARCHAR(MAX), @start AS INT, @max AS INT) AS
 
 SELECT '[' + STUFF(
 	(SELECT
@@ -89,13 +90,23 @@ SELECT '[' + STUFF(
 			FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'*/
 		  +'}'
 	  FROM 
-		[WBCCAD].[dbo].[PRDORC]
+		(SELECT * FROM 
+			(SELECT 
+				ROW_NUMBER() OVER (ORDER BY [WBCCAD].[dbo].[PRDORC].PRODUTO) AS ROW_NUM, 
+				[WBCCAD].[dbo].[PRDORC].PRODUTO,
+				[WBCCAD].[dbo].[PRDORC].DESCRICAO
+			FROM 
+				[WBCCAD].[dbo].[PRDORC]
+			WHERE 
+				[WBCCAD].[dbo].[PRDORC].Produto LIKE @search + '%' OR
+				[WBCCAD].[dbo].[PRDORC].Descricao LIKE '%' + @search + '%') AS [RESULT]
+		WHERE 
+			--ROW_NUM >= ((@pageNumber -1) * @pageSize) AND ROW_NUM < ((@pageNumber -1) * @pageSize) + @pageSize)
+			ROW_NUM BETWEEN ((@start - 1) * @max + 1) AND (@start * @max)
+		) AS [PAGE_RESULT]
 		--[WBCCAD].[dbo].[PRDEST] WITH (NOLOCK)
-	  WHERE 
-		--([WBCCAD].[dbo].[PRDEST].PRDORCCODIGOPAI LIKE @search + '%')
-		[WBCCAD].[dbo].[PRDORC].Produto LIKE @search + '%' OR
-		[WBCCAD].[dbo].[PRDORC].Descricao LIKE '%' + @search + '%'
 	  FOR XML PATH(''), TYPE).value('.', 'varchar(max)'), 1, 1, '') + ']' AS 'material'
+
 
 
 
