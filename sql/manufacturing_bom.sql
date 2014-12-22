@@ -1,7 +1,7 @@
 USE [INTEGRACAO]
 GO
 
-/****** Object:  StoredProcedure [dbo].[MANUFACTURING_BOM]    Script Date: 12/11/2014 08:25:29 ******/
+/****** Object:  StoredProcedure [dbo].[MANUFACTURING_BOM]    Script Date: 12/22/2014 08:09:59 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -10,7 +10,9 @@ GO
 
 
 
-CREATE PROCEDURE [dbo].[MANUFACTURING_BOM] (@order INT) AS
+
+
+ALTER PROCEDURE [dbo].[MANUFACTURING_BOM] (@order INT) AS
 
 SELECT STUFF(
 	(SELECT     
@@ -36,85 +38,94 @@ SELECT STUFF(
 			--ISNULL(WBCCAD.dbo.INTEGRACAO_ORCITM.SUBGRPCOD, 0) AS subgroup,
 			+ ',"parts":' + '[' + STUFF(
 			(SELECT
-				  --ISNULL([GRPCOD], 0) AS [group]
-				  --,ISNULL([SUBGRPCOD], 0) AS subgroup
-				  --,ISNULL([ORCITM], 0) AS item
-				  ',{"code":"' + LTRIM(RTRIM(CASE WHEN CHARINDEX('#', ISNULL([PRDCOD], '')) > 0 THEN LEFT(ISNULL([PRDCOD], ''), CHARINDEX('#', [PRDCOD]) -1) ELSE ISNULL([PRDCOD], '') END)) + '"'
-				  + ',"description":"' + LTRIM(RTRIM(UPPER(ISNULL(MIN([PRDDSC]), '')))) + '"'
-				  + ',"color": ' + 
-				  (SELECT TOP 1
-						'{"id":' + CAST([ID] AS NVARCHAR) 
-						+ ',"code":"' + LTRIM(RTRIM([CODE])) + '"' 
-						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
-						+ '}'
-					FROM 
-						[INTEGRACAO].dbo.[CM_COLOR]
-					WHERE 
-						[CODE] = MIN([CORCOD])
-					FOR XML PATH(''), TYPE).value('.', 'varchar(max)')
-				  + ',"quantity":{"value": ' + CAST(CAST(ISNULL(SUM([ORCQTD]), 0) AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ',"unit":' + 
-				  (SELECT TOP 1
-						'{"id":' + CAST([ID] AS NVARCHAR) 
-						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
-						+ ',"symbol":"' + LTRIM(RTRIM([SYMBOL])) + '"'
-						+ '}'
-					FROM 
-						[INTEGRACAO].dbo.[MS_UNIT]
-					WHERE 
-						[SYMBOL] = 'un'
-					FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
-				  + ',"width": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([PRDCOD], '#', '.'), 1) ELSE 0 END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit":' +
-				  (SELECT TOP 1
-						'{"id":' + CAST([ID] AS NVARCHAR) 
-						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
-						+ ',"symbol":"' + LTRIM(RTRIM([SYMBOL])) + '"'
-						+ '}'
-					FROM 
-						[INTEGRACAO].dbo.[MS_UNIT]
-					WHERE 
-						[SYMBOL] = 'mm'
-					FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
-				  + ',"height": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([PRDCOD], '#', '.'), 2) ELSE 0 END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit":' +
-				  (SELECT TOP 1
-						'{"id":' + CAST([ID] AS NVARCHAR) 
-						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
-						+ ',"symbol":"' + LTRIM(RTRIM([SYMBOL])) + '"'
-						+ '}'
-					FROM 
-						[INTEGRACAO].dbo.[MS_UNIT]
-					WHERE 
-						[SYMBOL] = 'mm'
-					FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
-				  + ',"length": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([PRDCOD], '#', '.'), 3) ELSE 0 END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit":' +
-				  (SELECT TOP 1
-						'{"id":' + CAST([ID] AS NVARCHAR) 
-						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
-						+ ',"symbol":"' + LTRIM(RTRIM([SYMBOL])) + '"'
-						+ '}'
-					FROM 
-						[INTEGRACAO].dbo.[MS_UNIT]
-					WHERE 
-						[SYMBOL] = 'mm'
-					FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
-				  --,CAST(ISNULL([ORCTOT], 0) AS DECIMAL(10,3)) AS value,
-				  + ',"weight": { "value": ' + CAST(SUM(CAST(ISNULL([ORCPES], 0) AS DECIMAL(10,3))) AS NVARCHAR(MAX)) + ', "unit":' +
-				  (SELECT TOP 1
-						'{"id":' + CAST([ID] AS NVARCHAR) 
-						+ ',"name":"' + LTRIM(RTRIM([NAME])) + '"'
-						+ ',"symbol":"' + LTRIM(RTRIM([SYMBOL])) + '"'
-						+ '}'
-					FROM 
-						[INTEGRACAO].dbo.[MS_UNIT]
-					WHERE 
-						[SYMBOL] = 'kg'
-					FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
-				  +'}'
+				(SELECT
+					  --ISNULL([GRPCOD], 0) AS [group]
+					  --,ISNULL([SUBGRPCOD], 0) AS subgroup
+					  --,ISNULL([ORCITM], 0) AS item
+					  ',{"material":{"id":0,"code":"' + LTRIM(RTRIM(UPPER(ISNULL([WBCCAD].[dbo].[PRDORC].[PRODUTO], '')))) + '"'
+					  + ',"description":"' + LTRIM(RTRIM(UPPER(ISNULL([WBCCAD].[dbo].[PRDORC].[DESCRICAO], '')))) + '"}'
+					  + ',"color": ' + 
+					  (SELECT TOP 1
+							'{"id":' + CAST([INTEGRACAO].dbo.[CM_COLOR].[ID] AS NVARCHAR) 
+							+ ',"code":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[CM_COLOR].[CODE])) + '"' 
+							+ ',"name":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[CM_COLOR].[NAME])) + '"'
+							+ '}'
+						FROM 
+							[INTEGRACAO].dbo.[CM_COLOR]
+						WHERE 
+							[INTEGRACAO].dbo.[CM_COLOR].[CODE] = MIN([CORCOD])
+						FOR XML PATH(''), TYPE).value('.', 'varchar(max)')
+					  + ',"quantity":{"value": ' + CAST(CAST(ISNULL(SUM([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[ORCQTD]), 0) AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ',"unit":' + 
+					  (SELECT TOP 1
+							'{"id":' + CAST([INTEGRACAO].dbo.[MS_UNIT].[ID] AS NVARCHAR) 
+							+ ',"name":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[NAME])) + '"'
+							+ ',"symbol":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[SYMBOL])) + '"'
+							+ '}'
+						FROM 
+							[INTEGRACAO].dbo.[MS_UNIT]
+						WHERE 
+							[INTEGRACAO].dbo.[MS_UNIT].[SYMBOL] = 'un'
+						FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
+					  + ',"width": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '#', '.'), 1) ELSE ISNULL([WBCCAD].[dbo].[PRDORC].[Comprimento], 0) END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit":' +
+					  (SELECT TOP 1
+							'{"id":' + CAST([INTEGRACAO].dbo.[MS_UNIT].[ID] AS NVARCHAR) 
+							+ ',"name":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[NAME])) + '"'
+							+ ',"symbol":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[SYMBOL])) + '"'
+							+ '}'
+						FROM 
+							[INTEGRACAO].dbo.[MS_UNIT]
+						WHERE 
+							[INTEGRACAO].dbo.[MS_UNIT].[SYMBOL] = 'mm'
+						FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
+					  + ',"height": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '#', '.'), 2) ELSE ISNULL([WBCCAD].[dbo].[PRDORC].[Altura], 0) END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit":' +
+					  (SELECT TOP 1
+							'{"id":' + CAST([INTEGRACAO].dbo.[MS_UNIT].[ID] AS NVARCHAR) 
+							+ ',"name":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[NAME])) + '"'
+							+ ',"symbol":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[SYMBOL])) + '"'
+							+ '}'
+						FROM 
+							[INTEGRACAO].dbo.[MS_UNIT]
+						WHERE 
+							[INTEGRACAO].dbo.[MS_UNIT].[SYMBOL] = 'mm'
+						FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
+					  + ',"length": { "value": '  + CAST(CAST(CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN PARSENAME(REPLACE([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '#', '.'), 3) ELSE ISNULL([WBCCAD].[dbo].[PRDORC].[Largura], 0) END AS DECIMAL(10,3)) AS NVARCHAR(MAX)) + ', "unit":' +
+					  (SELECT TOP 1
+							'{"id":' + CAST([INTEGRACAO].dbo.[MS_UNIT].[ID] AS NVARCHAR) 
+							+ ',"name":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[NAME])) + '"'
+							+ ',"symbol":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[SYMBOL])) + '"'
+							+ '}'
+						FROM 
+							[INTEGRACAO].dbo.[MS_UNIT]
+						WHERE 
+							[INTEGRACAO].dbo.[MS_UNIT].[SYMBOL] = 'mm'
+						FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
+					  --,CAST(ISNULL([ORCTOT], 0) AS DECIMAL(10,3)) AS value,
+					  + ',"weight": { "value": ' + CAST(SUM(CAST(ISNULL([ORCPES], 0) AS DECIMAL(10,3))) AS NVARCHAR(MAX)) + ', "unit":' +
+					  (SELECT TOP 1
+							'{"id":' + CAST([INTEGRACAO].dbo.[MS_UNIT].[ID] AS NVARCHAR) 
+							+ ',"name":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[NAME])) + '"'
+							+ ',"symbol":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[SYMBOL])) + '"'
+							+ '}'
+						FROM 
+							[INTEGRACAO].dbo.[MS_UNIT]
+						WHERE 
+							[INTEGRACAO].dbo.[MS_UNIT].[SYMBOL] = 'kg'
+						FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
+					  +'}'
+				  FROM
+					[WBCCAD].[dbo].[PRDORC]
+				  WHERE 
+  					LTRIM(RTRIM([WBCCAD].[dbo].[PRDORC].[PRODUTO])) = CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN LEFT([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) -1) ELSE LTRIM(RTRIM([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD])) END
+				  FOR XML PATH(''), TYPE).value('.', 'varchar(max)')
 			  FROM 
 				[WBCCAD].[dbo].[INTEGRACAO_ORCPRD]
+				--[WBCCAD].[dbo].[ORCMAT]				
 			  WHERE 
 				[WBCCAD].[dbo].[INTEGRACAO_ORCPRD].ORCNUM = [WBCCAD].[dbo].[INTEGRACAO_ORCITM].ORCNUM AND
-				[WBCCAD].[dbo].[INTEGRACAO_ORCPRD].ORCITM = [WBCCAD].[dbo].[INTEGRACAO_ORCITM].ORCITM
-			  GROUP BY [PRDCOD]
+				[WBCCAD].[dbo].[INTEGRACAO_ORCPRD].ORCITM = [WBCCAD].[dbo].[INTEGRACAO_ORCITM].ORCITM 
+				--[WBCCAD].[dbo].[ORCMAT].[numeroOrcamento] = [WBCCAD].[dbo].[INTEGRACAO_ORCITM].ORCNUM AND
+				--[WBCCAD].[dbo].[ORCMAT].
+			  GROUP BY [WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD]
 			  FOR XML PATH(''), TYPE).value('.', 'varchar(max)'), 1, 1, '') + ']' + '}'
 		FROM 
 			WBCCAD.dbo.INTEGRACAO_ORCCAB WITH (NOLOCK) INNER JOIN
@@ -136,6 +147,8 @@ SELECT STUFF(
 	WHERE     
 		(GPIMAC_Altamira.dbo.LPV.LPPED = @order)
 	FOR XML PATH(''), TYPE).value('.', 'varchar(max)'), 1, 1, '') AS 'order'
+
+
 
 
 
