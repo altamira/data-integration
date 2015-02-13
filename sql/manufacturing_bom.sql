@@ -1,12 +1,13 @@
 USE [INTEGRACAO]
 GO
 
-/****** Object:  StoredProcedure [dbo].[MANUFACTURING_BOM]    Script Date: 01/29/2015 14:54:47 ******/
+/****** Object:  StoredProcedure [dbo].[MANUFACTURING_BOM]    Script Date: 02/13/2015 18:10:58 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 
@@ -40,12 +41,13 @@ SELECT STUFF(
 			--ISNULL(WBCCAD.dbo.INTEGRACAO_ORCITM.SUBGRPCOD, 0) AS subgroup,
 			+ ',"component":' + '[' + STUFF(
 			(SELECT
-				(SELECT
+				/* ALTAMIRA-76: revert changes in component material
+				(SELECT*/
 					  --ISNULL([GRPCOD], 0) AS [group]
 					  --,ISNULL([SUBGRPCOD], 0) AS subgroup
 					  --,ISNULL([ORCITM], 0) AS item
-					  ',{"material":{"id":0,"code":"' + LTRIM(RTRIM(UPPER(ISNULL([WBCCAD].[dbo].[PRDORC].[PRODUTO], '')))) + '"'
-					  + ',"description":"' + LTRIM(RTRIM(UPPER(ISNULL([WBCCAD].[dbo].[PRDORC].[DESCRICAO], '')))) + '"}'
+					  ',{"material":{"id":0,"code":"' + LTRIM(RTRIM(UPPER(ISNULL(/*ALTAMIRA-76: [WBCCAD].[dbo].[PRDORC].[PRODUTO]*/[WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) + '"'
+					  + ',"description":"' + LTRIM(RTRIM(UPPER(ISNULL(/*ALTAMIRA-76: [WBCCAD].[dbo].[PRDORC].[DESCRICAO]*/MIN([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDDSC]), '')))) + '"}'
 					  + ',"color": ' + 
 					  (SELECT TOP 1
 							'{"id":' + CAST([INTEGRACAO].dbo.[CM_COLOR].[ID] AS NVARCHAR) 
@@ -68,7 +70,7 @@ SELECT STUFF(
 						WHERE 
 							[INTEGRACAO].dbo.[MS_UNIT].[SYMBOL] = 'un'
 						FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
-					  + ',"width": { "value": '  + CONVERT(VARCHAR(50), (CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN CAST(PARSENAME(REPLACE([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '#', '.'), 1) AS FLOAT) ELSE ISNULL([WBCCAD].[dbo].[PRDORC].[Comprimento], 0) END), 128) + ', "unit":' +
+					  + ',"width": { "value": '  + CONVERT(VARCHAR(50), (CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN CAST(PARSENAME(REPLACE([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '#', '.'), 1) AS FLOAT) ELSE ISNULL(/*ALTAMIRA-76: [WBCCAD].[dbo].[PRDORC].[Comprimento]*/NULL, 0) END), 128) + ', "unit":' +
 					  (SELECT TOP 1
 							'{"id":' + CAST([INTEGRACAO].dbo.[MS_UNIT].[ID] AS NVARCHAR) 
 							+ ',"name":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[NAME])) + '"'
@@ -79,7 +81,7 @@ SELECT STUFF(
 						WHERE 
 							[INTEGRACAO].dbo.[MS_UNIT].[SYMBOL] = 'mm'
 						FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
-					  + ',"height": { "value": '  + CONVERT(VARCHAR(50), (CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN CAST(PARSENAME(REPLACE([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '#', '.'), 2) AS FLOAT) ELSE ISNULL([WBCCAD].[dbo].[PRDORC].[Altura], 0) END), 128) + ', "unit":' +
+					  + ',"height": { "value": '  + CONVERT(VARCHAR(50), (CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN CAST(PARSENAME(REPLACE([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '#', '.'), 2) AS FLOAT) ELSE ISNULL(/*ALTAMIRA-76: [WBCCAD].[dbo].[PRDORC].[Altura]*/NULL, 0) END), 128) + ', "unit":' +
 					  (SELECT TOP 1
 							'{"id":' + CAST([INTEGRACAO].dbo.[MS_UNIT].[ID] AS NVARCHAR) 
 							+ ',"name":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[NAME])) + '"'
@@ -90,7 +92,7 @@ SELECT STUFF(
 						WHERE 
 							[INTEGRACAO].dbo.[MS_UNIT].[SYMBOL] = 'mm'
 						FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
-					  + ',"length": { "value": '  + CONVERT(VARCHAR(50), (CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN CAST(PARSENAME(REPLACE([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '#', '.'), 3) AS FLOAT) ELSE ISNULL([WBCCAD].[dbo].[PRDORC].[Largura], 0) END), 128) + ', "unit":' +
+					  + ',"length": { "value": '  + CONVERT(VARCHAR(50), (CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN CAST(PARSENAME(REPLACE([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '#', '.'), 3) AS FLOAT) ELSE ISNULL(/*ALTAMIRA-76: [WBCCAD].[dbo].[PRDORC].[Largura]*/NULL, 0) END), 128) + ', "unit":' +
 					  (SELECT TOP 1
 							'{"id":' + CAST([INTEGRACAO].dbo.[MS_UNIT].[ID] AS NVARCHAR) 
 							+ ',"name":"' + LTRIM(RTRIM([INTEGRACAO].dbo.[MS_UNIT].[NAME])) + '"'
@@ -114,11 +116,12 @@ SELECT STUFF(
 							[INTEGRACAO].dbo.[MS_UNIT].[SYMBOL] = 'kg'
 						FOR XML PATH(''), TYPE).value('.', 'varchar(max)') + '}'
 					  +'}'
+				  /* ALTAMIRA-76: revert changes in component material
 				  FROM
 					[WBCCAD].[dbo].[PRDORC]
 				  WHERE 
   					LTRIM(RTRIM([WBCCAD].[dbo].[PRDORC].[PRODUTO])) = CASE WHEN CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) > 0 THEN LEFT([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], CHARINDEX('#', LTRIM(RTRIM(ISNULL([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD], '')))) -1) ELSE LTRIM(RTRIM([WBCCAD].[dbo].[INTEGRACAO_ORCPRD].[PRDCOD])) END
-				  FOR XML PATH(''), TYPE).value('.', 'varchar(max)')
+				  FOR XML PATH(''), TYPE).value('.', 'varchar(max)')*/
 			  FROM 
 				[WBCCAD].[dbo].[INTEGRACAO_ORCPRD]
 				--[WBCCAD].[dbo].[ORCMAT]				
@@ -149,6 +152,7 @@ SELECT STUFF(
 	WHERE     
 		(GPIMAC_Altamira.dbo.LPV.LPPED = @order)
 	FOR XML PATH(''), TYPE).value('.', 'varchar(max)'), 1, 1, '') AS 'order'
+
 
 
 
