@@ -34,7 +34,7 @@ if (HttpContext.Current.Request.HttpMethod == "GET")
 {
     if (Request.QueryString.ToString().Length == 0) {
         Response.StatusCode = 400;
-        Response.Write("{\"message\": \"Número do Pedido é um parametro obrigatorio e não for informado. Exemplo: http://integracao.altamira.com.br/manufacturing/bom?72271.\"}");
+        Response.Write("{\"message\": \"Codigo ou Descrição é um parametro obrigatorio e não foi informado. Exemplo: http://integracao.altamira.com.br/material?search=CANTONEIRA\"}");
         return;
     }
 
@@ -42,10 +42,12 @@ if (HttpContext.Current.Request.HttpMethod == "GET")
     using (SqlConnection connection = new SqlConnection("Server=(local);Database=INTEGRACAO;User Id=integracao;Password=#35az09@;"))
     {
         // cria comando sql para localizar o usuario dentro da tabela
-        using (SqlCommand cmd = new SqlCommand("MANUFACTURING_BOM"))
+        using (SqlCommand cmd = new SqlCommand("MATERIAL"))
         {
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@order", Request.QueryString.ToString());
+            cmd.Parameters.AddWithValue("@search", Request.QueryString["search"]);
+	    cmd.Parameters.AddWithValue("@start", Request.QueryString["start"]);
+	    cmd.Parameters.AddWithValue("@max", Request.QueryString["max"]);
             
             // atribui a conexao ao comando
             cmd.Connection = connection;
@@ -61,7 +63,7 @@ if (HttpContext.Current.Request.HttpMethod == "GET")
             if (json == null || json == "")
             {
                         Response.StatusCode = 404;
-                        Response.Write("{\"message\": \"Pedido não encontrado !\"}");
+                        Response.Write("{\"message\": \"Material não encontrado !\"}");
             } else {
                         Response.StatusCode = 200;
                         Response.Write(json);
